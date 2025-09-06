@@ -15,6 +15,9 @@ contract AppSource {
 
     IEndpointV2 public immutable endpoint;
     uint256 public totalLocked;
+    mapping(address => uint256) public lockedTokens; // address => amount
+
+    event TokensLocked(address indexed user, uint256 amount, uint256 when);
 
     constructor(address _endpoint) {
         endpoint = IEndpointV2(_endpoint);
@@ -39,9 +42,17 @@ contract AppSource {
         );
         
         emit ETHDeposited(msg.sender, msg.value, guid);
+
+        lockedTokens[msg.sender] += msg.value;
+        emit TokensLocked(msg.sender, msg.value, block.timestamp);
     }
 
-    function getLockedBalance() external view returns (uint256) {
+    function getTLockedBalance() external view returns (uint256) {
         return address(this).balance;
+    }
+
+    // get locked tokens for a user
+    function getUserLockedTokens(address user) external view returns (uint256) {
+        return lockedTokens[user];
     }
 }
