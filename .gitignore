@@ -1,0 +1,23 @@
+# Compiler files
+cache/
+out/
+.data/
+
+node_modules/
+
+# Ignores development broadcast logs
+!/broadcast
+/broadcast/*/31337/
+/broadcast/*/31338/
+/broadcast/**/dry-run/
+
+# Docs
+docs/
+
+# Dotenv file
+.env
+
+.idea
+
+# Network generated files
+temp-network/
