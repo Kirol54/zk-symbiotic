@@ -21,3 +21,5 @@ docs/
 
 # Network generated files
 temp-network/
+
+target/
