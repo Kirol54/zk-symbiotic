@@ -1,18 +1,23 @@
 [package]
 version = "0.0.1"
-name = "golem-consensus-mpt"
+name = "golem-symbiotic-consensus-mpt"
 edition.workspace = true
 license.workspace = true
 authors.workspace = true
+
+#[[bin]]
+#name = "nbhead"
+#path = "./bin/nori_bridge_head.rs"
 
 [lib]
 path = "src/lib.rs"
 name = "nori"
 
 [dependencies]
+golem-symbiotic-app-source-contract-bindings = { workspace = true }
+golem-symbiotic-consensus-mpt-program = { workspace = true }
+golem-symbiotic-consensus-mpt-types = { workspace = true }
 nori-hash = { workspace = true }
-nori-sp1-helios-primitives = { workspace = true }
-nori-sp1-helios-program = { workspace = true }
 dotenv = { workspace = true }
 sp1-sdk = { workspace = true }
 tokio = { workspace = true }
@@ -35,6 +40,3 @@ async-trait = "0.1.86"
 futures = "0.3.31"
 rand = "0.9.0"
 chrono = "0.4.39"
-
-[build-dependencies]
-sp1-build = { workspace = true }
