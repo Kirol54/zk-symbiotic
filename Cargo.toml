@@ -1,5 +1,5 @@
 [workspace]
-members = ["golem-consensus-mpt"]
+members = ["golem-symbiotic-consensus-mpt-program", "golem-symbiotic-consensus-mpt-types", "golem-symbiotic-app-source-contract-bindings", "golem-symbiotic-consensus-mpt", "golem-symbiotic-consensus-mpt-program-builder"]
 resolver = "2"
 
 [workspace.package]
@@ -8,6 +8,12 @@ edition = "2021"
 authors = ["jk89", "Kirol54"]
 
 [workspace.dependencies]
+
+# zk-symbolic-golem
+golem-symbiotic-consensus-mpt-types = { path = "golem-symbiotic-consensus-mpt-types" }
+golem-symbiotic-app-source-contract-bindings = { path = "golem-symbiotic-app-source-contract-bindings" }
+golem-symbiotic-consensus-mpt-program = { path = "golem-symbiotic-consensus-mpt-program" }
+golem-symbiotic-consensus-mpt-program-builder = { path = "golem-symbiotic-consensus-mpt-program" }
 
 # nori
 nori-hash = { git = "https://github.com/Nori-zk/nori-bridge-head", package = "nori-hash", rev = "v8.1.2" }

@@ -1,0 +1,14 @@
+[package]
+version = "0.0.1"
+name = "golem-symbiotic-consensus-mpt-types"
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+serde = { workspace = true }
+helios-consensus-core = { workspace = true }
+alloy-sol-types = { workspace = true }
+alloy-primitives = { workspace = true, features = ["sha3-keccak"] }
+alloy-trie = { workspace = true }
+anyhow = { workspace = true }

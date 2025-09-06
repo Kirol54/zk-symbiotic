@@ -1,0 +1,21 @@
+#![no_main]
+sp1_zkvm::entrypoint!(main);
+use helios_consensus_core::consensus_spec::MainnetConsensusSpec;
+use golem_symbiotic_consensus_mpt_types::types::ProofInputs;
+use golem_symbiotic_consensus_mpt_program::consensus::consensus_mpt_program;
+
+pub fn main() {
+    // Read zk input
+    let encoded_inputs = sp1_zkvm::io::read_vec();
+
+    // Decode inputs
+    println!("Decoding inputs");
+    let proof_inputs: ProofInputs<MainnetConsensusSpec> = serde_cbor::from_slice(&encoded_inputs).unwrap();
+    println!("Decoded inputs");
+
+    // Run nori sp1 helios zk program
+    let proof_outputs = consensus_mpt_program(proof_inputs, true).unwrap();
+
+    // Write zk output
+    sp1_zkvm::io::commit_slice(&proof_outputs.to_bytes());
+}
