@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "es2021", // goal: ship *the most modern syntax* that is supported by *all* browsers that support our Wasm
+    "module": "nodenext", // allow top-level await
+    "moduleResolution": "nodenext", // comply with node + "type": "module"
+    "lib": ["dom", "esnext"],
+    "outDir": "./build",
+    "rootDir": ".",
+    "strict": true,
+    "strictPropertyInitialization": false, // to enable generic constructors, e.g. on CircuitValue
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "allowJs": true,
+    "declaration": true,
+    "sourceMap": true,
+    "noFallthroughCasesInSwitch": true,
+    "allowSyntheticDefaultImports": true,
+    "useDefineForClassFields": false,
+    "baseUrl": ".",
+    "paths": {
+      "*": ["*", "src/*", "node_modules/*"]
+    },
+    "isolatedModules": true
+  },
+  "include": ["./src", "./src/example-inputs/*.json"],
+  "exclude": ["**/*.spec.ts"]
+}

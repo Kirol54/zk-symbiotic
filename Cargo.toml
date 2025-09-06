@@ -9,6 +9,10 @@ authors = ["jk89", "Kirol54"]
 
 [workspace.dependencies]
 
+# golem
+
+golem-base-sdk = { workspace = true }
+
 # zk-symbolic-golem
 golem-symbiotic-consensus-mpt-types = { path = "golem-symbiotic-consensus-mpt-types" }
 golem-symbiotic-app-source-contract-bindings = { path = "golem-symbiotic-app-source-contract-bindings" }
