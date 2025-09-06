@@ -105,10 +105,15 @@ async function dualLockTokens(amountETH: string): Promise<LockResult> {
 	try {
 		console.log("🚀 Executing LOCAL deposit only...");
 		console.log("📡 LOCAL → LOCAL (40231)");
-		
-		const localTx = await localAppSource.depositETH(LOCAL_EID, RECEIVER, OPTIONS, {
-			value: amountWei,
-		});
+
+		const localTx = await localAppSource.depositETH(
+			LOCAL_EID,
+			RECEIVER,
+			OPTIONS,
+			{
+				value: amountWei,
+			}
+		);
 
 		console.log("⏳ Waiting for transaction confirmation...");
 		console.log(`   LOCAL TX:  ${localTx.hash}`);
@@ -121,21 +126,32 @@ async function dualLockTokens(amountETH: string): Promise<LockResult> {
 		console.log("");
 
 		// Extract GUID from event
-		const ethDepositedTopic = ethers.id("ETHDeposited(address,uint256,bytes32)");
-		const localGuid = localReceipt.logs.find((log: any) => 
-			log.topics[0] === ethDepositedTopic
-		)?.data.slice(-64) || "N/A";
+		const ethDepositedTopic = ethers.id(
+			"ETHDeposited(address,uint256,bytes32)"
+		);
+		const localGuid =
+			localReceipt.logs
+				.find((log: any) => log.topics[0] === ethDepositedTopic)
+				?.data.slice(-64) || "N/A";
 
 		console.log("🎯 LayerZero GUID:");
 		console.log(`   LOCAL:  0x${localGuid}`);
 		console.log("");
 
 		// Show final balances and locked amounts
-		const localBalanceAfter = await localProvider.getBalance(localWallet.address);
-		const localLocked = await localAppSource.getUserLockedTokens(localWallet.address);
+		const localBalanceAfter = await localProvider.getBalance(
+			localWallet.address
+		);
+		const localLocked = await localAppSource.getUserLockedTokens(
+			localWallet.address
+		);
 
 		console.log("📊 Final status:");
-		console.log(`   LOCAL balance:  ${ethers.formatEther(localBalanceAfter)} ETH (locked: ${ethers.formatEther(localLocked)} ETH)`);
+		console.log(
+			`   LOCAL balance:  ${ethers.formatEther(
+				localBalanceAfter
+			)} ETH (locked: ${ethers.formatEther(localLocked)} ETH)`
+		);
 		console.log("");
 
 		console.log("🎉 LOCAL locking completed successfully!");
