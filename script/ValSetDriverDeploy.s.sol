@@ -43,7 +43,6 @@ import {KeyRegistry} from "../src/symbiotic/KeyRegistry.sol";
 import {Driver} from "../src/symbiotic/Driver.sol";
 import {VotingPowers} from "../src/symbiotic/VotingPowers.sol";
 import {Settlement} from "../src/symbiotic/Settlement.sol";
-import {SumTask} from "../src/SumTask.sol";
 
 contract ValSetDriverDeploy is LocalDeploy {
     using KeyTags for uint8;
@@ -58,11 +57,9 @@ contract ValSetDriverDeploy is LocalDeploy {
         SYMBIOTIC_CORE_PROJECT_ROOT = "lib/core-contracts/";
 
         loadRelayContracts();
-        loadSumTaskContracts();
 
         setupDriver();
 
         logAndDumpRelayContracts();
-        logAndDumpSumTaskContracts();
     }
 }

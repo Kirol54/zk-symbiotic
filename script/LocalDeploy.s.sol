@@ -44,7 +44,6 @@ import {KeyRegistry} from "../src/symbiotic/KeyRegistry.sol";
 import {Driver} from "../src/symbiotic/Driver.sol";
 import {VotingPowers} from "../src/symbiotic/VotingPowers.sol";
 import {Settlement} from "../src/symbiotic/Settlement.sol";
-import {SumTask} from "../src/SumTask.sol";
 
 contract LocalDeploy is SymbioticCoreInit {
     using KeyTags for uint8;
@@ -67,9 +66,6 @@ contract LocalDeploy is SymbioticCoreInit {
         CrossChainAddress[] votingPowerProviders;
     }
 
-    struct SumTaskContracts {
-        CrossChainAddress[] sumTasks;
-    }
 
     bytes32 internal constant KEY_OWNERSHIP_TYPEHASH = keccak256("KeyOwnership(address operator,bytes key)");
 
@@ -93,7 +89,6 @@ contract LocalDeploy is SymbioticCoreInit {
     EnumerableMap.UintToAddressMap internal votingPowerProviders;
     EnumerableMap.UintToAddressMap internal settlements;
 
-    EnumerableMap.UintToAddressMap internal sumTasks;
 
     uint256 internal operatorsCount;
 
@@ -116,8 +111,6 @@ contract LocalDeploy is SymbioticCoreInit {
         setupSettlement();
         logAndDumpRelayContracts();
 
-        setupSumTask();
-        logAndDumpSumTaskContracts();
 
         for (uint256 i; i < OPERATOR_COUNT; ++i) {
             addOperator(OPERATOR_STAKE_AMOUNT);
@@ -336,14 +329,6 @@ contract LocalDeploy is SymbioticCoreInit {
         return IValSetDriver.CrossChainAddress({chainId: uint64(block.chainid), addr: address(driver_)});
     }
 
-    function setupSumTask() public returns (IValSetDriver.CrossChainAddress memory) {
-        vm.startBroadcast(deployer);
-        SumTask sumTask = new SumTask(address(settlements.get(block.chainid)));
-        sumTasks.set(block.chainid, address(sumTask));
-        vm.stopBroadcast();
-
-        return IValSetDriver.CrossChainAddress({chainId: uint64(block.chainid), addr: address(sumTask)});
-    }
 
     function logAndDumpRelayContracts() public {
         console.log("Symbiotic Relay contracts:");
@@ -406,26 +391,6 @@ contract LocalDeploy is SymbioticCoreInit {
         vm.writeJson(finalJson, "temp-network/deploy-data/relay_contracts.json");
     }
 
-    function logAndDumpSumTaskContracts() public {
-        console.log("SumTask contracts:");
-        for (uint256 i; i < sumTasks.length(); ++i) {
-            (uint256 chainId, address sumTask) = sumTasks.at(i);
-            console.log("   SumTask (chainId:", chainId, "):", sumTask);
-        }
-
-        string memory obj = "sumTaskContracts";
-
-        string[] memory sumTasksData = new string[](sumTasks.length());
-        for (uint256 i; i < sumTasks.length(); ++i) {
-            (uint256 chainId, address sumTask) = sumTasks.at(i);
-            vm.serializeUint("sumTask", "chainId", chainId);
-            string memory sumTaskData = vm.serializeAddress("sumTask", "addr", sumTask);
-            sumTasksData[i] = sumTaskData;
-        }
-        string memory finalJson = vm.serializeString(obj, "sumTasks", sumTasksData);
-
-        vm.writeJson(finalJson, "temp-network/deploy-data/sum_task_contracts.json");
-    }
 
     function loadRelayContracts() public {
         string memory root = vm.projectRoot();
@@ -457,18 +422,6 @@ contract LocalDeploy is SymbioticCoreInit {
         }
     }
 
-    function loadSumTaskContracts() public {
-        string memory root = vm.projectRoot();
-        string memory path = string.concat(root, "/temp-network/deploy-data/sum_task_contracts.json");
-        string memory json = vm.readFile(path);
-        bytes memory data = vm.parseJson(json);
-        SumTaskContracts memory sumTaskContracts = abi.decode(data, (SumTaskContracts));
-
-        sumTasks.clear();
-        for (uint256 i; i < sumTaskContracts.sumTasks.length; ++i) {
-            sumTasks.set(sumTaskContracts.sumTasks[i].chainId, sumTaskContracts.sumTasks[i].addr);
-        }
-    }
 
     function addOperator(uint256 stakeAmount) public {
         Vm.Wallet memory operator = getOperator(operatorsCount);

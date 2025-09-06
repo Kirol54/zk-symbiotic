@@ -3,6 +3,7 @@ pragma solidity ^0.8.25;
 
 import {Test, console} from "forge-std/Test.sol";
 import {SymbioticDvn} from "../src/layerzero/dvn/SymbioticDvn.sol";
+import {ILayerZeroDVN} from "../src/layerzero/dvn/interfaces/ILayerZeroDVN.sol";
 import {StubZkEthStateVerifier} from "../src/layerzero/zk/StubZkEthStateVerifier.sol";
 import {IZkEthStateVerifier} from "../src/layerzero/zk/IZkEthStateVerifier.sol";
 import {BETH} from "../src/layerzero/app/BETH.sol";
@@ -180,7 +181,7 @@ contract DvnE2ETest is Test {
         );
         
         console.log("Deposit GUID:", vm.toString(guid));
-        assertEq(appSource.getLockedBalance(), 1 ether, "ETH should be locked in source");
+        assertEq(appSource.getTLockedBalance(), 1 ether, "ETH should be locked in source");
         
         // 2. Simulate message delivery on destination chain
         vm.prank(mockEndpoint);
@@ -198,7 +199,7 @@ contract DvnE2ETest is Test {
         assertEq(fee, 0, "Fee should be 0 in stub implementation");
         
         // Test job assignment with fee
-        SymbioticDvn.AssignJobParam memory param = SymbioticDvn.AssignJobParam({
+        ILayerZeroDVN.AssignJobParam memory param = ILayerZeroDVN.AssignJobParam({
             dstEid: DST_EID,
             packetHeader: abi.encodePacked(uint256(1)),
             payloadHash: bytes32(uint256(2)),
