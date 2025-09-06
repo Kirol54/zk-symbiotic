@@ -139,11 +139,12 @@ check_balance "$HOLESKY_RPC_URL" "HOLESKY" "$HOLESKY_ETH_PRIV_KEY" || {
 }
 echo ""
 
-# Local deployment (Anvil)
+# Local deployment (Anvil) with Mock Endpoint
 echo "📦 Deploying AppSource on LOCAL network (Chain ID: 31337)..."
 LOCAL_PRIV_KEY_WITH_PREFIX=$(ensure_0x_prefix "$LOCAL_ETH_PRIV_KEY")
-LOCAL_RESULT=$(PRIVATE_KEY=$LOCAL_PRIV_KEY_WITH_PREFIX forge script script/DeployAppSourceLocal.s.sol --rpc-url http://127.0.0.1:8545 --broadcast --private-key $LOCAL_PRIV_KEY_WITH_PREFIX 2>&1)
+LOCAL_RESULT=$(PRIVATE_KEY=$LOCAL_PRIV_KEY_WITH_PREFIX forge script script/DeployAppSourceLocalWithMock.s.sol --rpc-url http://127.0.0.1:8545 --broadcast --private-key $LOCAL_PRIV_KEY_WITH_PREFIX 2>&1)
 LOCAL_ADDRESS=$(echo "$LOCAL_RESULT" | grep "AppSource deployed on LOCAL to:" | awk '{print $6}')
+MOCK_ENDPOINT=$(echo "$LOCAL_RESULT" | grep "Mock Endpoint deployed at:" | awk '{print $5}')
 
 if [ -z "$LOCAL_ADDRESS" ]; then
     echo "❌ Failed to deploy AppSource on LOCAL network"
@@ -155,9 +156,8 @@ fi
 echo "✅ LOCAL AppSource deployed: $LOCAL_ADDRESS"
 
 # Verify LOCAL deployment
-LOCAL_ENDPOINT="0x1a44076050125825900e736c501f859c50fE728c"
 check_contract_deployment "$LOCAL_ADDRESS" "http://127.0.0.1:8545" "LOCAL" || exit 1
-verify_contract_functionality "$LOCAL_ADDRESS" "http://127.0.0.1:8545" "LOCAL" "$LOCAL_ENDPOINT" || exit 1
+verify_contract_functionality "$LOCAL_ADDRESS" "http://127.0.0.1:8545" "LOCAL" "$MOCK_ENDPOINT" || exit 1
 echo ""
 
 # Holesky deployment  

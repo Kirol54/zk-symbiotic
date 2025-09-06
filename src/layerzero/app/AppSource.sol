@@ -30,21 +30,26 @@ contract AppSource {
     ) external payable returns (bytes32 guid) {
         require(msg.value > 0, "Amount must be greater than 0");
         
-        totalLocked += msg.value;
+        // Reserve some ETH for LayerZero gas fees (0.01 ETH = 1e16 wei)
+        uint256 layerZeroFee = 1e16; // 0.01 ETH for cross-chain gas (increased for real LZ)
+        require(msg.value > layerZeroFee, "Insufficient value for LayerZero fees");
         
-        bytes memory payload = abi.encode(msg.sender, msg.value);
+        uint256 depositAmount = msg.value - layerZeroFee;
+        totalLocked += depositAmount;
         
-        guid = endpoint.send{value: 0}(
+        bytes memory payload = abi.encode(msg.sender, depositAmount);
+        
+        guid = endpoint.send{value: layerZeroFee}(
             dstEid, 
             abi.encodePacked(receiver), 
             payload, 
             options
         );
         
-        emit ETHDeposited(msg.sender, msg.value, guid);
+        emit ETHDeposited(msg.sender, depositAmount, guid);
 
-        lockedTokens[msg.sender] += msg.value;
-        emit TokensLocked(msg.sender, msg.value, block.timestamp);
+        lockedTokens[msg.sender] += depositAmount;
+        emit TokensLocked(msg.sender, depositAmount, block.timestamp);
     }
 
     function getTLockedBalance() external view returns (uint256) {
