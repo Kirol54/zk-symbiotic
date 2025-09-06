@@ -9,38 +9,73 @@ export class RelayClient {
     proof: string;
   }> {
     try {
-      console.log(`Requesting signature for message hash: ${messageHash}`);
+      console.log(`🔐 Requesting signature for message hash: ${messageHash}`);
+      console.log(`📡 Contacting Relay Aggregator at: ${this.baseUrl}`);
       
-      // For demo purposes, return mock data
-      // In production, this would call the actual Relay Aggregator API
-      const response = await axios.post(`${this.baseUrl}/sign`, {
+      // Try to call the real Relay Aggregator API
+      // The actual API endpoints depend on the Relay implementation
+      const response = await axios.post(`${this.baseUrl}/api/v1/aggregate`, {
         message: messageHash,
+        timeout: 30000, // 30 second timeout for BLS aggregation
+      }, {
+        timeout: 35000,
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
-      return {
-        aggregatedSignature: response.data.signature || '0x' + '00'.repeat(96), // Mock BLS signature
-        epoch: response.data.epoch || 1,
-        proof: response.data.proof || '0x' + '00'.repeat(32), // Mock proof
-      };
-    } catch (error) {
-      console.error('Error requesting signature from Relay:', error);
+      if (response.data && response.data.signature) {
+        console.log(`✅ Got real signature from Relay for epoch: ${response.data.epoch}`);
+        return {
+          aggregatedSignature: response.data.signature,
+          epoch: response.data.epoch,
+          proof: response.data.proof || '0x',
+        };
+      } else {
+        throw new Error('Invalid response format from Relay Aggregator');
+      }
       
-      // Return mock data for development
+    } catch (error: any) {
+      console.warn('⚠️  Could not get signature from Relay Aggregator:', error?.message || error);
+      console.log('🔄 Falling back to development mode with mock signatures');
+      
+      // For Phase 0, return mock data when Relay is not fully running
+      // In production, this should fail hard
       return {
-        aggregatedSignature: '0x' + '00'.repeat(96),
+        aggregatedSignature: '0x' + '00'.repeat(96), // 96-byte mock BLS signature
         epoch: 1,
-        proof: '0x' + '00'.repeat(32),
+        proof: '0x', // Empty proof for Simple BLS verifier
       };
     }
   }
 
   async getCurrentEpoch(): Promise<number> {
     try {
-      const response = await axios.get(`${this.baseUrl}/epoch`);
-      return response.data.epoch || 1;
-    } catch (error) {
-      console.error('Error getting current epoch:', error);
+      const response = await axios.get(`${this.baseUrl}/api/v1/status`, {
+        timeout: 5000,
+      });
+      
+      if (response.data && typeof response.data.currentEpoch === 'number') {
+        return response.data.currentEpoch;
+      }
+      
+      return 1; // Default epoch
+    } catch (error: any) {
+      console.warn('⚠️  Could not get current epoch from Relay:', error?.message || error);
       return 1; // Mock epoch
+    }
+  }
+
+  async checkAggregatorStatus(): Promise<boolean> {
+    try {
+      const response = await axios.get(`${this.baseUrl}/health`, {
+        timeout: 3000,
+      });
+      
+      return response.status === 200;
+    } catch (error) {
+      console.log(`❌ Aggregator at ${this.baseUrl} is not responding`);
+      return false;
     }
   }
 }
