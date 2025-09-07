@@ -1,3 +1,52 @@
+# ZK-block-lock
+
+A LayerZero DVN that only approves cross-chain messages when two independent guarantees hold: (1) a stake-weighted quorum of Symbiotic Relay operators signs the packet, and (2) a ZK proof attests the LayerZero PacketSent event is included in a finalized Ethereum block. Result: multichain delivery with both crypto-economic and cryptographic security.
+
+## 🎯 Project Overview
+
+We've built a LayerZero DVN that provides **dual security**:
+
+- **Stake-backed verification** through Symbiotic Relay operators
+- **ZK-finalized proof** that LayerZero packets are included in finalized Ethereum blocks
+
+## Problem
+
+DVNs typically rely on committees or oracles whose assurances are purely crypto-economic.
+
+## Solution
+
+We fuse Symbiotic’s Relay SDK (universal staking → validator sets → aggregated BLS signatures verified on-chain) with our Ethereum state ZK proof (~14-minute/≥N-slot finality). A packet is deliverable only when both checks pass, tightening trust. The proofs are stored and then later retrieved using GolumDB.
+
+### Architecture Flow
+
+```
+User calls AppSource.depositETH (ETH)
+→ locks ETH → Endpoint.send(...) → PacketSent event
+→ DVN worker: sees event → computes message hash H
+→ Relay: operators sign H → Aggregator returns aggregated BLS signature
+→ ZK prover: publishes proof (finalized block + log inclusion)
+→ DVN worker fetches proof from GolemDB
+→ DVN worker → DVN contract (dest): submitVerification(packetId, H, aggSig, zkProof, zkInputs)
+→ DVN contract: Settlement.verifyQuorumSigAt(H, ...) ✅ AND ZkVerifier.verifySourceEvent(...) ✅
+→ ULN/Executor: delivers to AppDest.onLzReceive → AppDest mints bETH to user
+```
+
+## Why it’s novel
+
+Dual guarantees: crypto-economic restaking + cryptographic finality.
+
+Composable: DVN is reusable for any OApp; zk module is pluggable.
+
+## What have we achieved during the hackathoon?
+
+- full idea creation/plan
+- skeleton setup of Symbiotic Relay
+- deposit token lock contract (AppSource.sol. mint token contract (AppDest.sol), token (bETH.sol)
+- deploy script and locking script for above
+- mock zk verifier contract
+- dvn worker in typescript (skeleton, not working version)
+- typescript code to store the generated proof and to get it after using GolemDB
+
 # Sum task network example
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/symbioticfi/symbiotic-super-sum)
